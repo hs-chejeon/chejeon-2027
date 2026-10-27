@@ -1,4 +1,5 @@
 <meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="light">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>2027 전국체전추진단 예산 검토</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -36,8 +37,9 @@
   --font-display: "IBM Plex Sans KR", "Noto Sans KR", system-ui, sans-serif;
   --font-body: "Noto Sans KR", "IBM Plex Sans KR", system-ui, sans-serif;
 }
+/* 기기 다크 모드와 상관없이 항상 흰 바탕(원래 디자인) */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root[data-theme="system-dark"] {
     --bg: #0b1220; --surface: #142033; --raised: #1b2a42; --ink: #e8eef7; --ink-2: #bccadb; --muted: #8798b0;
     --line: #24364f; --line-strong: #34496a; --navy: #0a1a33; --navy-2: #12284a; --on-navy: #f2f6fb; --on-navy-2: #a9bbd3;
     --accent: #3987e5; --accent-soft: #16294a; --kim: #d95926; --kim-soft: #33201a; --teal: #199e70; --warn: #f0b23c;
