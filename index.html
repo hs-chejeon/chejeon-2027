@@ -344,6 +344,57 @@ footer { font-size: 16px; color: var(--muted); border-top: 1px solid var(--line)
   .m-side.kh .m-side-h { color: var(--kim); }
   .m-side-h b { font-size: 15px; color: var(--ink); margin-left: 6px; }
 }
+
+/* 휴대폰 2차: Mobbin 참고(Copilot·Lloyds 요약, Neo Financial 밑줄 탭·목록 줄) — 700px 이하만 */
+.m-hero { display: none; }
+@media (max-width: 700px) {
+  .stats > .stat { display: none !important; }
+  .stats { display: block; }
+  .m-hero { display: grid; gap: 10px; }
+  .mh-card { background: var(--surface); color: var(--ink); border-radius: 16px; padding: 16px; display: grid; gap: 4px; }
+  .mh-label { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .mh-label span { margin-left: 4px; font-weight: 500; }
+  .mh-big { font-family: "Gmarket Sans", var(--font-display); font-size: 36px; font-weight: 700; line-height: 1.1; letter-spacing: -0.5px; margin-top: 2px; color: var(--ink); }
+  .mh-big small { font-size: 16px; margin-left: 3px; color: var(--muted); font-weight: 500; }
+  .mh-card.kim .mh-big { color: var(--kim); }
+  .mh-sub { font-size: 12px; color: var(--muted); }
+  .mh-head { font-size: 13px; font-weight: 700; color: var(--ink); margin-top: 10px; }
+  .mh-rows { list-style: none; margin: 8px 0 0; padding: 0; border-top: 1px solid var(--line); }
+  .mh-rows li { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .mh-rows li:last-child { border-bottom: 0; }
+  .mh-rows li span { color: var(--ink-2); }
+  .mh-rows li b { font-variant-numeric: tabular-nums; font-size: 15px; color: var(--ink); }
+  .mh-rows li.cur span, .mh-rows li.cur b { color: var(--accent); font-weight: 700; }
+  .mh-rows.bars li i { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--raised); position: relative; overflow: hidden; }
+  .mh-rows.bars li i::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: var(--w); background: var(--c); border-radius: 3px; }
+  .mh-card.note p { margin: 4px 0 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+
+  nav.tabs { background: var(--bg) !important; border: 0 !important; gap: 0; padding: 0 8px !important; box-shadow: inset 0 -1px 0 var(--line) !important; }
+  .tab, .tab.hs, .tab.kh, .tab.doc { background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; color: var(--muted) !important; padding: 0 12px; }
+  .tab::before, .tab.doc::before { display: none !important; }
+  .tab[aria-selected="true"], .tab.doc[aria-selected="true"] { color: var(--ink) !important; box-shadow: inset 0 -3px 0 var(--accent) !important; }
+
+  .m-cards { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .m-row { border-bottom: 1px solid var(--line); }
+  .m-row:last-child { border-bottom: 0; }
+  .m-row.total { background: var(--raised); }
+  .m-row summary, .mr-sum { list-style: none; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 12px 14px; min-height: 44px; }
+  .m-row summary { grid-template-columns: 1fr auto 10px; cursor: pointer; }
+  .m-row summary::-webkit-details-marker { display: none; }
+  .m-row summary::after { content: "›"; color: var(--muted); font-size: 18px; transition: transform 140ms ease; }
+  .m-row[open] summary::after { transform: rotate(90deg); }
+  .mr-name { font-size: 14.5px; font-weight: 600; color: var(--ink); line-height: 1.35; display: grid; }
+  .mr-name small { font-size: 12px; font-weight: 500; color: var(--muted); }
+  .mr-amt { text-align: right; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; display: grid; }
+  .mr-amt small { font-size: 11px; font-weight: 500; color: var(--accent); }
+  .m-row:not(.total) .mr-amt small { display: none; }   /* 같은 열 이름은 맨 위 계 줄에만 */
+  .mr-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; padding: 0 14px 10px; font-size: 13px; }
+  .mr-grid span { color: var(--muted); }
+  .mr-grid b { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .m-row .m-text { padding: 0 14px 12px; font-size: 13px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+  .m-row .m-side { margin: 0 14px 12px; }
+}
+@media (max-width: 700px) and (prefers-reduced-motion: reduce) { .m-row summary::after { transition: none; } }
 </style>
 
 <div class="wrap">
@@ -394,9 +445,13 @@ function table(head, rows, opts = {}) {
     const title = short.length ? short.map((i) => r[i]) : [r[0]];
     const longs = tc.filter((i) => !short.includes(i));
     const nums = th.map((c, i) => i).filter((i) => th[i].numCol && String(r[i] ?? '').trim() !== '');
-    return `<div class="m-card${isT ? ' total' : ''}"><div class="m-title">${title.map((x, j) => j ? `<span class="m-sub">${esc(x)}</span>` : `<b>${esc(x)}</b>`).join('')}</div>
-      ${nums.length ? `<div class="m-nums">${nums.map((i) => `<div class="m-num${th[i].hl ? ' hl-' + th[i].hl : ''}"><span>${esc(th[i].h)}</span><b>${esc(r[i])}</b></div>`).join('')}</div>` : ''}
-      ${longs.map((i) => `<p class="m-text"><span>${esc(th[i].h)}</span>${esc(r[i])}</p>`).join('')}</div>`;
+    // 목록 한 줄: 이름(왼쪽) + 대표 금액(오른쪽). 누르면 나머지 금액·설명이 펼쳐진다.
+    const keyIdx = nums.find((i) => th[i].hl === 'hs') ?? nums[nums.length - 1];
+    const rest = nums.filter((i) => i !== keyIdx);
+    const more = rest.length || longs.length;
+    const head = `<span class="mr-name">${title.map((x, j) => j ? `<small>${esc(x)}</small>` : esc(x)).join('')}</span>${keyIdx != null ? `<span class="mr-amt"><small>${esc(th[keyIdx].h)}</small>${esc(r[keyIdx])}</span>` : ''}`;
+    const body = `${rest.length ? `<div class="mr-grid">${rest.map((i) => `<span>${esc(th[i].h)}</span><b>${esc(r[i])}</b>`).join('')}</div>` : ''}${longs.map((i) => `<p class="m-text">${esc(r[i])}</p>`).join('')}`;
+    return more && !isT ? `<details class="m-row"><summary>${head}</summary>${body}</details>` : `<div class="m-row${isT ? ' total' : ''}"><div class="mr-sum">${head}</div>${isT ? body : ''}</div>`;
   }).join('')}</div>` : '';
   return `${unit && hasNum ? `<div class="unit">단위: ${esc(unit)}</div>` : ''}${cards}<div class="scroll${cards ? ' d-only' : ''}"><table class="${opts.cols ? 'fixed' : 'auto-first'}">${cols}
     ${head.length ? `<thead><tr>${th.map((c) => `<th class="${c.numCol ? 'num' : ''}${c.hl ? ' hl-' + c.hl : ''}">${esc(c.h)}</th>`).join('')}</tr></thead>` : ''}
@@ -427,6 +482,26 @@ function renderStats() {
         <li>운동장 빼면 <b>김해 22억</b>(기획·운영 12억·지방채 이자 8억·기본경비 1억) vs <b>화성 501억</b>(시설비 401억·운영비 99억)</li>
         <li>타부서 포함 시: 김해 백서 2,374억(2018~24) / 화성 634억(타부서 133억 포함) — 아래 표 참고</li>
       </ul>
+    </div>
+    <div class="m-hero">
+      <section class="mh-card">
+        <div class="mh-label">전국체전추진단 예산 총액 <span>2025~2027년</span></div>
+        <div class="mh-big">${won(s.total).toLocaleString()}<small>억원</small></div>
+        <div class="mh-sub">${Number(s.total).toLocaleString()}천원</div>
+        <ul class="mh-rows">${Object.entries(y).map(([yr, v]) => `<li class="${yr === '2027' ? 'cur' : ''}"><span>${yr}년</span><b>${won(v).toLocaleString()}억</b></li>`).join('')}</ul>
+        <div class="mh-head">성질별</div>
+        <ul class="mh-rows bars">${parts.map(([n, l, c]) => `<li><span>${l}</span><b>${won(k[n]).toLocaleString()}억</b><i style="--w:${Math.max(1, Math.round(k[n] / s.total * 100))}%;--c:${c}"></i></li>`).join('')}</ul>
+      </section>
+      <section class="mh-card kim">
+        <div class="mh-label">2024 김해시 전국체전추진단 예산 총액 <span>2022~2024년</span></div>
+        <div class="mh-big">${won(130507451).toLocaleString()}<small>억원</small></div>
+        <ul class="mh-rows"><li><span>김해종합운동장 건립</span><b>1,283억</b></li><li><span>그 밖(기획·운영·지방채 이자·기본경비)</span><b>22억</b></li></ul>
+      </section>
+      <section class="mh-card note">
+        <div class="mh-head">왜 2.6배 차이?</div>
+        <p>차이 804억은 <b>김해종합운동장 신축(1,283억)</b> 때문입니다. 화성은 신축 없이 개보수·환경개선(시설비 401억)입니다.</p>
+        <p>다른 부서까지 넣으면 김해 2,374억(백서, 2018~24), 화성 634억(다른 부서 133억 포함)입니다.</p>
+      </section>
     </div>`;
 }
 
@@ -481,10 +556,10 @@ function opsTable() {
     const cls = [SIDE[i] === 'mid' ? 'mid' : '', i === 2 || i === 4 ? 'amt-col' : ''].filter(Boolean).join(' ');
     return `<td class="${cls}">${i === 4 ? flag(v) : esc(v)}</td>`;
   };
-  const cardsHtml = `<div class="m-cards ops-cards"><div class="m-card total"><div class="m-title"><b>계</b></div><div class="m-nums"><div class="m-num hl-hs"><span>2027 화성시</span><b>${hsSum.toLocaleString()}</b></div><div class="m-num hl-kh"><span>2024 김해시</span><b>${kimSum.toLocaleString()}</b></div></div></div>
-    ${src.map((r) => `<div class="m-card"><div class="m-title"><b>${esc(r[1])}</b><span class="m-sub">${esc(r[0])}</span></div>
-      <div class="m-side hs"><div class="m-side-h">2027 화성시 <b>${esc(r[6])}</b></div>${r[7] ? `<p class="m-text">${esc(r[7])}</p>` : ''}${r[5] ? `<p class="m-text"><span>담당</span>${esc(r[5])}</p>` : ''}</div>
-      <div class="m-side kh"><div class="m-side-h">2024 김해시 <b>${esc(r[4])}</b></div>${r[2] ? `<p class="m-text">${esc(r[2])}</p>` : ''}${r[3] ? `<p class="m-text"><span>담당</span>${esc(r[3])}</p>` : ''}</div></div>`).join('')}</div>`;
+  const cardsHtml = `<div class="m-cards ops-cards"><div class="m-row total"><div class="mr-sum"><span class="mr-name">계</span><span class="mr-amt"><small>2027 화성시</small>${hsSum.toLocaleString()}</span></div><div class="mr-grid"><span>2024 김해시</span><b>${kimSum.toLocaleString()}</b></div></div>
+    ${src.map((r) => `<details class="m-row"><summary><span class="mr-name">${esc(r[1])}<small>${esc(r[0])}</small></span><span class="mr-amt"><small>2027 화성시</small>${esc(r[6])}</span></summary>
+      <div class="m-side hs"><div class="m-side-h">2027 화성시</div>${r[7] ? `<p class="m-text">${esc(r[7])}</p>` : ''}${r[5] ? `<p class="m-text"><span>담당</span>${esc(r[5])}</p>` : ''}</div>
+      <div class="m-side kh"><div class="m-side-h">2024 김해시 <b>${esc(r[4])}</b></div>${r[2] ? `<p class="m-text">${esc(r[2])}</p>` : ''}${r[3] ? `<p class="m-text"><span>담당</span>${esc(r[3])}</p>` : ''}</div></details>`).join('')}</div>`;
   return cardsHtml + `<div class="scroll d-only"><table class="ops fixed mirror"><colgroup>${WIDTHS.map((w) => `<col style="width:${w}%">`).join('')}</colgroup>
     <thead>
       <tr class="side-row"><th colspan="3" class="side-kh">2024 김해시</th><th class="side-mid" rowspan="2">분야</th><th colspan="3" class="side-hs">2027 화성시</th></tr>
