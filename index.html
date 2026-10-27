@@ -251,8 +251,62 @@ td:last-child:not(.num) { min-width: 22ch; }
 .stat.cur { background: var(--accent); border-color: var(--accent); }
 .stat.cur .k, .stat.cur .v, .stat.cur .v small, .stat.cur .s { color: #ffffff; }
 footer { font-size: 16px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 4px; }
-@media (max-width: 560px) { body { font-size: 18px; } table { font-size: 17px; } th, td { padding: 5px 9px; } .stat .v { font-size: 32px; } .stat .k { font-size: 19px; } }
+
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+
+/* ── 휴대폰 화면 ── */
+.m-cards { display: none; }
+@media (max-width: 700px) {
+  .d-only { display: none !important; }
+  .m-cards { display: grid; gap: 10px; }
+  .m-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; box-shadow: var(--shadow); }
+  .m-card.total { background: var(--raised); border-color: var(--line-strong); }
+  .m-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 16px; line-height: 1.35; }
+  .m-title b { font-weight: 700; color: var(--ink); }
+  .m-sub { font-size: 13px; color: var(--muted); }
+  .m-nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 6px; }
+  .m-num { display: grid; gap: 1px; padding: 6px 8px; border-radius: 8px; background: var(--raised); }
+  .m-num span { font-size: 12px; color: var(--muted); }
+  .m-num b { font-size: 15px; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .m-num.hl-hs { background: var(--accent); } .m-num.hl-hs span, .m-num.hl-hs b { color: #fff; }
+  .m-num.hl-kh { background: var(--kim-soft); }
+  .m-text { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+  .m-text span { display: inline-block; font-size: 12px; font-weight: 700; color: var(--muted); margin-right: 6px; }
+  .m-side { border-left: 4px solid var(--accent); padding: 4px 0 4px 10px; display: grid; gap: 4px; }
+  .m-side.kh { border-left-color: var(--kim); }
+  .m-side-h { font-size: 13px; font-weight: 700; color: var(--muted); }
+  .m-side-h b { font-size: 15px; color: var(--ink); margin-left: 6px; }
+  /* 상단 박스: 총액·성질별·김해·분석은 한 줄 전체, 연도 3개는 한 줄에 */
+  .stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat.total, .stat.kinds, .stat.kim, .stat.analysis { grid-column: 1 / -1; }
+  .stat { padding: 10px 12px; }
+  .stats > .stat:not(.total):not(.kinds):not(.kim):not(.analysis) .k { font-size: 14px; min-height: 0; }
+  .stats > .stat:not(.total):not(.kinds):not(.kim):not(.analysis) .v { font-size: 20px; white-space: nowrap; }
+  .stats > .stat:not(.total):not(.kinds):not(.kim):not(.analysis) .v small { font-size: 12px; margin-left: 2px; }
+  .stats > .stat:not(.total):not(.kinds):not(.kim):not(.analysis) .s { font-size: 10.5px; }
+  .stat.total .v, .stat.kim .v { font-size: 30px; }
+  .stat.total .k, .stat.kim .k { white-space: normal; font-size: 15px; }
+  .stat.analysis .k { font-size: 15px; }
+  .why { font-size: 13px; }
+  .cmp-bar i { font-size: 11px; padding: 0 5px; }
+  /* 탭: 한 줄로 옆으로 밀어서 보기 */
+  nav.tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: none; font-size: 14.5px; }
+  /* 숫자 표는 한 화면에 들어가게 작게 */
+  body { font-size: 16px; }
+  table { font-size: 12px; }
+  th, td { padding: 5px 4px; }
+  .split table.fixed { min-width: 0; }
+  .split col:first-child { width: 16% !important; }
+  .m-nums { grid-template-columns: repeat(auto-fit, minmax(56px, 1fr)); gap: 4px; }
+  .block.detail { padding: 10px !important; }
+  .m-card { padding: 10px 10px; }
+  .m-num { padding: 5px 6px; }
+  .m-num b { font-size: 13.5px; white-space: nowrap; }
+  .print-bar { display: none; }
+  h1 { font-size: 26px; }
+}
 </style>
 
 <div class="wrap">
@@ -293,7 +347,21 @@ function table(head, rows, opts = {}) {
   });
   const hasNum = th.some((c) => c.numCol);
   const cols = opts.cols ? `<colgroup>${opts.cols.map((w) => `<col style="width:${w}%">`).join('')}</colgroup>` : '';
-  return `${unit && hasNum ? `<div class="unit">단위: ${esc(unit)}</div>` : ''}<div class="scroll"><table class="${opts.cols ? 'fixed' : 'auto-first'}">${cols}
+  // 휴대폰: 설명 글이 긴 표는 줄마다 카드로 보여준다(숫자만 있는 표는 작은 표 그대로)
+  const textCols = th.map((c, i) => i).filter((i) => !th[i].numCol);
+  const longCol = textCols.some((i) => i > 0 && ordered.some((r) => String(r[i] ?? '').length > 18));
+  const cards = (longCol && !opts.noCards) ? `<div class="m-cards">${ordered.map((r) => {
+    const isT = /^계( |$)|\s계$/.test((r[0] || '').trim());
+    const tc = textCols.filter((i) => String(r[i] ?? '').trim());
+    const short = tc.filter((i) => String(r[i]).length <= 30);
+    const title = short.length ? short.map((i) => r[i]) : [r[0]];
+    const longs = tc.filter((i) => !short.includes(i));
+    const nums = th.map((c, i) => i).filter((i) => th[i].numCol && String(r[i] ?? '').trim() !== '');
+    return `<div class="m-card${isT ? ' total' : ''}"><div class="m-title">${title.map((x, j) => j ? `<span class="m-sub">${esc(x)}</span>` : `<b>${esc(x)}</b>`).join('')}</div>
+      ${nums.length ? `<div class="m-nums">${nums.map((i) => `<div class="m-num${th[i].hl ? ' hl-' + th[i].hl : ''}"><span>${esc(th[i].h)}</span><b>${esc(r[i])}</b></div>`).join('')}</div>` : ''}
+      ${longs.map((i) => `<p class="m-text"><span>${esc(th[i].h)}</span>${esc(r[i])}</p>`).join('')}</div>`;
+  }).join('')}</div>` : '';
+  return `${unit && hasNum ? `<div class="unit">단위: ${esc(unit)}</div>` : ''}${cards}<div class="scroll${cards ? ' d-only' : ''}"><table class="${opts.cols ? 'fixed' : 'auto-first'}">${cols}
     ${head.length ? `<thead><tr>${th.map((c) => `<th class="${c.numCol ? 'num' : ''}${c.hl ? ' hl-' + c.hl : ''}">${esc(c.h)}</th>`).join('')}</tr></thead>` : ''}
     <tbody>${ordered.map((r) => `<tr class="${/^계( |$)|\s계$/.test((r[0] || '').trim()) ? 'total' : ''}">${th.map((c, i) => `<td class="${c.numCol ? 'num' : ''}${i === 0 ? ' first' : ''}${c.hl ? ' hl-' + c.hl : ''}">${esc(r[i] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody>
   </table></div>`;
@@ -376,7 +444,11 @@ function opsTable() {
     const cls = [SIDE[i] === 'mid' ? 'mid' : '', i === 2 || i === 4 ? 'amt-col' : ''].filter(Boolean).join(' ');
     return `<td class="${cls}">${i === 4 ? flag(v) : esc(v)}</td>`;
   };
-  return `<div class="scroll"><table class="ops fixed mirror"><colgroup>${WIDTHS.map((w) => `<col style="width:${w}%">`).join('')}</colgroup>
+  const cardsHtml = `<div class="m-cards ops-cards"><div class="m-card total"><div class="m-title"><b>계</b></div><div class="m-nums"><div class="m-num hl-hs"><span>2027 화성시</span><b>${hsSum.toLocaleString()}</b></div><div class="m-num hl-kh"><span>2024 김해시</span><b>${kimSum.toLocaleString()}</b></div></div></div>
+    ${src.map((r) => `<div class="m-card"><div class="m-title"><b>${esc(r[1])}</b><span class="m-sub">${esc(r[0])}</span></div>
+      <div class="m-side hs"><div class="m-side-h">2027 화성시 <b>${esc(r[6])}</b></div>${r[7] ? `<p class="m-text">${esc(r[7])}</p>` : ''}${r[5] ? `<p class="m-text"><span>담당</span>${esc(r[5])}</p>` : ''}</div>
+      <div class="m-side kh"><div class="m-side-h">2024 김해시 <b>${esc(r[4])}</b></div>${r[2] ? `<p class="m-text">${esc(r[2])}</p>` : ''}${r[3] ? `<p class="m-text"><span>담당</span>${esc(r[3])}</p>` : ''}</div></div>`).join('')}</div>`;
+  return cardsHtml + `<div class="scroll d-only"><table class="ops fixed mirror"><colgroup>${WIDTHS.map((w) => `<col style="width:${w}%">`).join('')}</colgroup>
     <thead>
       <tr class="side-row"><th colspan="3" class="side-kh">2024 김해시</th><th class="side-mid" rowspan="2">분야</th><th colspan="3" class="side-hs">2027 화성시</th></tr>
       <tr>${LABELS.map((h, i) => (i === 3 ? '' : `<th>${esc(h)}</th>`)).join('')}</tr>
