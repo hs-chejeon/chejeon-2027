@@ -147,6 +147,12 @@ nav.tabs { display: flex; gap: 2px; flex-wrap: wrap; align-items: center; positi
 .tab.doc::before { content: ""; width: 9px; height: 11px; border-radius: 1px; background: transparent; border: 1.5px solid var(--kim); }
 .tab.doc[aria-selected="true"] { background: var(--kim); border-color: var(--kim); color: #ffffff; box-shadow: 0 4px 12px rgba(15,27,45,0.25); }
 .tab.doc[aria-selected="true"]::before { background: transparent; border-color: #ffffff; }
+/* 준비체계~읍면동: 김해 백서 분야별 탭은 네모 + 왼쪽 주황 막대로 구분 */
+.tab.area { border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font-weight: 600; }
+.tab.area::before { width: 3px; height: 15px; border-radius: 2px; background: var(--kim); }
+.tab.area:hover { border-color: var(--kim); color: var(--ink); }
+.tab.area[aria-selected="true"] { background: var(--kim-soft); border-color: var(--kim); color: var(--kim); box-shadow: inset 0 -3px 0 var(--kim); }
+.tab.area[aria-selected="true"]::before { background: var(--kim); }
 .tabsep { width: 1px; align-self: stretch; background: var(--line-strong); margin: 4px 2px; }
 @media (prefers-reduced-motion: reduce) { .tab { transition: none; } }
 
@@ -206,38 +212,82 @@ figure.scan img { display: block; width: 100%; height: auto; }
 .print-btn { font: inherit; font-size: 14px; font-weight: 600; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-2); cursor: pointer; }
 .print-btn:hover { border-color: var(--navy); color: var(--ink); }
 .print-tab-name { display: none; }
-/* 조직도 탭: 운영위원회 → 집행부(종합상황실 + 18부) · 시민추진단 */
-.org { display: grid; gap: 14px; }
-.org-node { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; box-shadow: var(--shadow); min-width: 0; }
-.org-node h3 { margin: 0 0 4px; font-family: var(--font-display); font-size: 20px; }
-.org-node .sub { color: var(--muted); font-size: 15.5px; font-weight: 500; }
-.org-node dl { margin: 6px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 16.5px; }
-.org-node dt { font-weight: 700; color: var(--ink-2); white-space: nowrap; }
-.org-node dd { margin: 0; }
-.org-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 280px); gap: 12px; max-width: 980px; justify-self: center; width: 100%; }
-.org-node.navy { background: var(--navy); color: var(--on-navy); border-color: var(--navy); }
-.org-node.navy .sub, .org-node.navy dt { color: var(--on-navy-2); }
-.org-node.adv { border-style: dashed; box-shadow: none; }
-.org-line { width: 2px; height: 18px; background: var(--line-strong); justify-self: center; }
-.org-split { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); gap: 12px; align-items: start; }
-.org-split > .org-node { border-top: 4px solid var(--accent); }
-.org-split > .org-node.civ { border-top-color: var(--teal); }
-.org-hq { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; margin-top: 10px; background: var(--accent-soft); border-radius: 10px; padding: 10px 14px; }
-.org-hq h4, .org-group h4 { margin: 0 0 4px; font-size: 17px; }
-.org-teams3 { display: flex; flex-wrap: wrap; gap: 6px; }
-.org-teams3 span { background: var(--surface); border: 1px solid var(--line-strong); border-radius: 8px; padding: 2px 10px; font-size: 15.5px; font-weight: 600; }
-.org-group { margin-top: 14px; }
-.org-group h4 small { font-weight: 500; color: var(--muted); font-size: 15px; margin-left: 6px; }
-.org-depts { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
-.org-dept { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 8px 10px; background: var(--surface); break-inside: avoid; }
-.org-dept.ext { border-left-color: var(--teal); }
-.org-dept .dn { font-weight: 700; font-size: 16.5px; }
-.org-dept .dn b { color: var(--muted); font-weight: 600; font-size: 14px; margin-left: 6px; }
-.org-dept .lead { color: var(--muted); font-size: 14px; margin-bottom: 4px; }
-.org-dept ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
-.org-dept li { background: var(--raised); border-radius: 6px; padding: 1px 7px; font-size: 14.5px; }
-@media (max-width: 760px) { .org-top, .org-split, .org-hq { grid-template-columns: 1fr; } }
-@media print { .org-node { box-shadow: none; } .org-depts { grid-template-columns: repeat(5, 1fr); } .org-dept li, .org-dept .lead { font-size: 9.5px; } .org-dept .dn, .org-node dl { font-size: 11px; } }
+/* 조직도 탭: 선으로 잇는 계층도. 운영위원회 → 집행부·시민추진단 → 종합상황실 → 18부 → 팀 */
+.oc { --oc-line: var(--line-strong); display: grid; gap: 0; padding: 6px 0 4px; }
+.oc-box { background: var(--surface); border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 8px 14px; text-align: center; position: relative; z-index: 1; min-width: 0; }
+.oc-box h3 { margin: 0; font-family: var(--font-display); font-size: 19px; line-height: 1.3; }
+.oc-box .sub { display: block; color: var(--muted); font-size: 14.5px; line-height: 1.45; }
+.oc-box.navy { background: var(--navy); border-color: var(--navy); color: var(--on-navy); box-shadow: var(--shadow); }
+.oc-box.navy .sub { color: var(--on-navy-2); }
+.oc-box.blue { background: var(--accent); border-color: var(--accent); color: #ffffff; }
+.oc-box.blue .sub { color: rgba(255,255,255,0.85); }
+.oc-box.civ { border-color: var(--teal); border-width: 2px; }
+.oc-box.adv { border-style: dashed; }
+.oc-box dl { margin: 6px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 1px 10px; text-align: left; font-size: 15px; }
+.oc-box dt { font-weight: 700; white-space: nowrap; opacity: 0.85; }
+.oc-box dd { margin: 0; }
+.oc-stem { width: 0; height: 18px; border-left: 2px solid var(--oc-line); justify-self: center; margin: 0 auto; }
+/* 맨 위: 운영위원회(가운데) - - 고문(오른쪽) */
+.oc-top { display: grid; grid-template-columns: 1fr minmax(0, 560px) 1fr; align-items: center; }
+.oc-top > .oc-box.navy { grid-column: 2; }
+.oc-adv { grid-column: 3; display: flex; align-items: center; min-width: 0; }
+.oc-adv::before { content: ""; width: 28px; flex: none; border-top: 2px dashed var(--oc-line); }
+.oc-adv .oc-box { max-width: 230px; }
+/* 가지: 위 가로줄 + 각 칸으로 내려가는 세로줄 */
+.oc-row { display: flex; align-items: stretch; }
+.oc-col { flex: 1 1 0; min-width: 0; position: relative; padding: 18px 5px 0; display: flex; flex-direction: column; align-items: center; }
+.oc-col::before { content: ""; position: absolute; top: 0; left: 0; right: 0; border-top: 2px solid var(--oc-line); }
+.oc-col:first-child::before { left: 50%; }
+.oc-col:last-child::before { right: 50%; }
+.oc-col::after { content: ""; position: absolute; top: 0; left: 50%; height: 18px; border-left: 2px solid var(--oc-line); }
+.oc-row.lv2 > .oc-col:first-child { flex: 4.2 1 0; }
+.oc-row.lv2 > .oc-col { justify-content: flex-start; }
+/* 종합상황실 ── 전국체전추진단 */
+.oc-hq { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0; }
+.oc-hq .oc-unit { display: flex; align-items: center; }
+.oc-hq .oc-unit::before { content: ""; width: 26px; border-top: 2px solid var(--oc-line); }
+.oc-chips { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-top: 5px; }
+.oc-chips span { border: 1px solid var(--line-strong); background: var(--accent-soft); border-radius: 6px; padding: 0 8px; font-size: 14px; font-weight: 600; }
+/* 18부: 왼쪽 줄기에서 줄마다 가지 */
+.oc-depts { position: relative; width: 100%; }
+.oc-depts::before { content: ""; position: absolute; top: 0; left: 12px; right: 50%; border-top: 2px solid var(--oc-line); }
+.oc-band { position: relative; padding: 34px 0 0 28px; }
+.oc-band::before { content: ""; position: absolute; left: 12px; top: 0; bottom: 0; border-left: 2px solid var(--oc-line); }
+.oc-band:last-child::before { bottom: auto; height: 36px; }
+.oc-band > .oc-tag { position: absolute; top: 8px; left: 28px; font-size: 14.5px; font-weight: 700; color: var(--ink-2); }
+.oc-band > .oc-tag small { font-weight: 500; color: var(--muted); margin-left: 4px; }
+.oc-band .oc-col:first-child::before { left: -16px; }
+.oc-band.ext .oc-dept { border-color: var(--teal); }
+.oc-band.ext .oc-dept .dh { background: var(--teal); }
+.oc-dept { width: 100%; border: 1.5px solid var(--accent); border-radius: 9px; overflow: hidden; background: var(--surface); position: relative; z-index: 1; }
+.oc-dept .dh { background: var(--accent); color: #ffffff; padding: 5px 6px 4px; text-align: center; }
+.oc-dept .dh b { display: block; font-size: 16px; line-height: 1.3; }
+.oc-dept .dh small { display: block; font-size: 12.5px; line-height: 1.35; opacity: 0.9; }
+.oc-dept ul { list-style: none; margin: 0; padding: 4px 6px 7px; position: relative; display: grid; gap: 4px; }
+.oc-dept ul::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 14px; border-left: 1.5px solid var(--line-strong); }
+.oc-dept li { position: relative; background: var(--raised); border: 1px solid var(--line); border-radius: 6px; padding: 1px 4px; font-size: 13.5px; text-align: center; line-height: 1.45; word-break: keep-all; }
+.oc-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: flex-end; font-size: 14px; color: var(--muted); margin-top: 10px; }
+.oc-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+@media (max-width: 760px) {
+  .oc-top { grid-template-columns: 1fr; gap: 8px; }
+  .oc-top > .oc-box.navy, .oc-adv { grid-column: 1; }
+  .oc-adv::before { display: none; }
+  .oc-adv .oc-box { max-width: none; width: 100%; }
+  .oc-row, .oc-row.lv2 { flex-direction: column; }
+  .oc-band .oc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .oc-col { padding: 8px 0 0; }
+  .oc-col::before, .oc-col::after, .oc-depts::before, .oc-band::before { display: none; }
+  .oc-band { padding: 30px 0 0; }
+  .oc-band > .oc-tag { left: 0; }
+  .oc-hq .oc-unit::before { display: none; }
+  .oc-hq { gap: 8px; }
+}
+@media print {
+  .oc-box.navy { box-shadow: none; }
+  .oc-box h3 { font-size: 13px; } .oc-box .sub, .oc-box dl { font-size: 10px; }
+  .oc-dept .dh b { font-size: 11px; } .oc-dept .dh small { font-size: 8.5px; }
+  .oc-dept li, .oc-chips span, .oc-band > .oc-tag { font-size: 9.5px; }
+}
 @media print {
   @page { size: A4 landscape; margin: 8mm; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -405,9 +455,9 @@ footer { font-size: 16px; color: var(--muted); border-top: 1px solid var(--line)
   .mh-card.note p { margin: 4px 0 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
 
   nav.tabs { background: var(--bg) !important; border: 0 !important; gap: 0; padding: 0 8px !important; box-shadow: inset 0 -1px 0 var(--line) !important; }
-  .tab, .tab.hs, .tab.kh, .tab.doc { background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; color: var(--muted) !important; padding: 0 12px; }
-  .tab::before, .tab.doc::before { display: none !important; }
-  .tab[aria-selected="true"], .tab.doc[aria-selected="true"] { color: var(--ink) !important; box-shadow: inset 0 -3px 0 var(--accent) !important; }
+  .tab, .tab.hs, .tab.kh, .tab.doc, .tab.area { background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; color: var(--muted) !important; padding: 0 12px; }
+  .tab::before, .tab.doc::before, .tab.area::before { display: none !important; }
+  .tab[aria-selected="true"], .tab.doc[aria-selected="true"], .tab.area[aria-selected="true"] { color: var(--ink) !important; box-shadow: inset 0 -3px 0 var(--accent) !important; }
 
   .m-cards { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
   .m-row { border-bottom: 1px solid var(--line); }
@@ -617,7 +667,7 @@ function buildOrg() {
     ['복지부', '돌봄복지국·성평등가족국', ['노약자보호팀', '장애인지원팀', '미아보호팀', '여성지원팀']],
     ['도시정비부', '안전건설실·주택국', ['도시미관팀', '도로정비팀', '하천관리팀']],
     ['교통지원부', '교통국', ['교통안내팀', '교통주차팀', '대중교통팀']],
-    ['환경정비부', '기후환경에너지국·맑은물사업소·공원녹지사업소', ['가로수정비팀', '급수지원팀', '공중화장실관리팀', '청소행정팀', '환경정비팀']],
+    ['환경정비부', '기후환경에너지국·맑은물·공원녹지사업소', ['가로수정비팀', '급수지원팀', '공중화장실관리팀', '청소행정팀', '환경정비팀']],
   ];
   const EXT = [
     ['읍·면·동지원부', '29개 읍·면·동', ['읍면동지원팀 ×29']],
@@ -627,32 +677,41 @@ function buildOrg() {
     ['경비교통부', '화성서부·동탄경찰서', ['경호·경비팀', '교통대책팀', '안전대책팀']],
   ];
   const cnt = (d) => (d[0] === '읍·면·동지원부' ? 29 : d[2].length);
-  const dept = (d, ext) => `<div class="org-dept${ext ? ' ext' : ''}"><div class="dn">${esc(d[0])}<b>${cnt(d)}팀</b></div><div class="lead">${esc(d[1])}</div><ul>${d[2].map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>`;
   const sum = (a) => a.reduce((n, d) => n + cnt(d), 0);
+  const dept = (d) => `<div class="oc-col"><div class="oc-dept"><div class="dh"><b>${esc(d[0])}</b><small>${esc(d[1])} · ${cnt(d)}팀</small></div><ul>${d[2].map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div></div>`;
+  const band = (tag, list, ext) => `<div class="oc-band${ext ? ' ext' : ''}"><div class="oc-tag">${tag}</div><div class="oc-row">${list.map(dept).join('')}</div></div>`;
   addPanel('org', '조직도', 'hs', `
-    <div class="panel-head"><h2>대회 준비 추진체계 조직도</h2><span class="src">출처: 2027 전국체전 기본계획 p.10~13, 18~31</span></div>
-    <div class="org">
-      <div class="org-top">
-        <div class="org-node navy"><h3>전국(장애인)체육대회 운영위원회</h3><div class="sub">100명 내외 · 2026. 5. ~ 2029. 5. · 양대 체전 통합 구성</div>
-          <dl><dt>위원장</dt><dd>시장</dd><dt>부위원장</dt><dd>부시장, 교육장, 경찰서장, 소방서장, 체육회장, 장애인체육회(상임)부회장</dd><dt>위원</dt><dd>시의원, 유관기관장, 양 체육회 임원, 종목단체장, 사회단체장 등</dd></dl></div>
-        <div class="org-node adv"><h3>고문</h3><div class="sub">국회의원, 시의회 의장, 도의원, 대학총장 등</div></div>
+    <div class="panel-head"><h2>대회 준비 추진체계 조직도</h2></div>
+    <div class="oc">
+      <div class="oc-top">
+        <div class="oc-box navy"><h3>전국(장애인)체육대회 운영위원회</h3><span class="sub">위원장 시장 · 100명 내외 · 2026. 5. ~ 2029. 5.</span>
+          <dl><dt>부위원장</dt><dd>부시장, 교육장, 경찰서장, 소방서장, 체육회장, 장애인체육회(상임)부회장</dd><dt>위원</dt><dd>시의원, 유관기관장, 양 체육회 임원, 종목단체장, 사회단체장 등</dd></dl></div>
+        <div class="oc-adv"><div class="oc-box adv"><h3>고문</h3><span class="sub">국회의원, 시의회 의장, 도의원, 대학총장 등</span></div></div>
       </div>
-      <div class="org-line" aria-hidden="true"></div>
-      <div class="org-split">
-        <div class="org-node"><h3>집행부 <span class="sub">1실 18부 84팀 · 분야별 대회 준비 · 2026. 3. 구성</span></h3>
-          <div class="org-hq">
-            <div><h4>종합상황실 (1실)</h4><dl><dt>실장</dt><dd>교육체육국장</dd><dt>반장</dt><dd>전국체전추진단장</dd></dl><div class="sub">대회 6개월 전 종합상황실 체제로 전환</div></div>
-            <div><h4>전국체전추진단 <span class="sub">1단 3팀 13명 · 단장 5급</span></h4><div class="org-teams3"><span>전국체전기획팀 4</span><span>전국체전운영팀 4</span><span>전국체전시설팀 4</span></div><div class="sub" style="margin-top:4px">양대 체전 집행부 업무 총괄·조정</div></div>
+      <div class="oc-stem"></div>
+      <div class="oc-row lv2">
+        <div class="oc-col">
+          <div class="oc-box blue"><h3>집행부 · 1실 18부 84팀</h3><span class="sub">분야별 대회 준비 · 2026. 3. 구성</span></div>
+          <div class="oc-stem"></div>
+          <div class="oc-hq">
+            <div class="oc-box"><h3>종합상황실</h3><span class="sub">실장 교육체육국장 · 반장 전국체전추진단장</span><span class="sub">대회 6개월 전 상황실 체제로 전환</span></div>
+            <div class="oc-unit"><div class="oc-box"><h3>전국체전추진단</h3><span class="sub">1단 3팀 13명 · 단장 5급</span><div class="oc-chips"><span>기획팀 4</span><span>운영팀 4</span><span>시설팀 4</span></div></div></div>
           </div>
-          <div class="org-group"><h4>시 집행부 ${CITY.length}부 <small>${sum(CITY)}팀</small></h4><div class="org-depts">${CITY.map((d) => dept(d, false)).join('')}</div></div>
-          <div class="org-group"><h4>읍·면·동 · 유관기관 ${EXT.length}부 <small>${sum(EXT)}팀</small></h4><div class="org-depts">${EXT.map((d) => dept(d, true)).join('')}</div></div>
+          <div class="oc-stem"></div>
+          <div class="oc-depts">
+            ${band(`시 집행부 <small>13부 ${sum(CITY)}팀</small>`, CITY.slice(0, 7), false)}
+            ${band(`시 집행부 <small>(이어서)</small>`, CITY.slice(7), false)}
+            ${band(`읍·면·동 · 유관기관 <small>5부 ${sum(EXT)}팀</small>`, EXT, true)}
+          </div>
         </div>
-        <div class="org-node civ"><h3>시민추진단</h3><div class="sub">대회 홍보·응원 및 지원</div>
-          <dl><dt>근거</dt><dd>화성시 전국체육대회 시민추진단 조례</dd><dt>구성</dt><dd>화성시민, 2024. 9. 5. 구성 후 계속 모집</dd><dt>운영위</dt><dd>60명 이내 (심의·의결)</dd><dt>역할</dt><dd>홍보·안내, 종목 경기 응원, 환경미화, 자원봉사</dd></dl></div>
+        <div class="oc-col">
+          <div class="oc-box civ"><h3>시민추진단</h3><span class="sub">대회 홍보·응원 및 지원</span>
+            <dl><dt>근거</dt><dd>시민추진단 조례</dd><dt>구성</dt><dd>화성시민 (2024. 9. 5. 구성, 계속 모집)</dd><dt>운영위</dt><dd>60명 이내</dd><dt>역할</dt><dd>홍보·안내, 경기 응원, 환경미화, 자원봉사</dd></dl></div>
+        </div>
       </div>
-      <div class="block narrow"><div class="block-head"><h3>집행부 구성</h3><span class="unit">단위: 개</span></div>${table(['구분', '계', '시', '읍면동', '교육지원청', '경찰서', '소방서', '체육회'], [['실', '1', '1', '-', '-', '-', '-', '-'], ['부', '18', '13', '1', '1', '1', '1', '1'], ['팀', '84', '44', '29', '3', '3', '3', '2']], { cols: [16, 12, 12, 12, 12, 12, 12, 12] })}</div>
-      <div class="notes"><p>팀 수는 기본계획 p.13 표(시 44 · 읍면동 29 · 교육지원청 3 · 경찰서 3 · 소방서 3 · 체육회 2 = 84팀)와 맞춰 확인했습니다. 추진단 3팀은 종합상황실 소속이라 84팀에 넣지 않습니다.</p></div>
-    </div>`);
+      <div class="oc-legend"><span><i style="background:var(--accent)"></i>시 집행부</span><span><i style="background:var(--teal)"></i>읍·면·동 · 유관기관</span><span><i style="border:1.5px dashed var(--line-strong)"></i>자문</span></div>
+    </div>
+    <div class="block narrow"><div class="block-head"><h3>집행부 구성</h3><span class="unit">단위: 개</span></div>${table(['구분', '계', '시', '읍면동', '교육지원청', '경찰서', '소방서', '체육회'], [['실', '1', '1', '-', '-', '-', '-', '-'], ['부', '18', '13', '1', '1', '1', '1', '1'], ['팀', '84', '44', '29', '3', '3', '3', '2']], { cols: [16, 12, 12, 12, 12, 12, 12, 12] })}</div>`);
 }
 function buildOps() {
   const groups = [...new Set(DATA.ops.map((r) => r[0]))];
@@ -684,7 +743,7 @@ function buildP83() {
 }
 function buildAreas() {
   for (const a of DATA.areas) {
-    addPanel(a.key, a.name, 'kh', `
+    addPanel(a.key, a.name, 'area', `
       <div class="panel-head"><h2>${esc(a.title)}</h2><span class="src">${esc(a.source)}</span></div>
       ${a.sections.map((s) => `<div class="block">${s.title ? `<h3>${esc(s.title)}</h3>` : ''}${s.rows.length || s.head.length ? table(s.head, s.rows, { unit: unitOf(s.title) }) : ''}${s.notes.length ? `<div class="notes">${s.notes.map((n) => `<p>${esc(n)}</p>`).join('')}</div>` : ''}</div>`).join('')}`);
   }
