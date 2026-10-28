@@ -736,7 +736,6 @@ function buildOps() {
 function buildKimBudget() {
   const s = DATA.summary;
   addPanel('kimbud', '김해시 예산', 'kh', `
-    <div class="panel-head"><h2>2024 김해시 전국체전 예산</h2><span class="src">① 추진단 예산서(3개년) ② 타부서 예산서 ③ 백서 예산·세부내역</span></div>
     <div class="block narrow"><h3>① 김해시 전국체전추진단 예산 (2022~2024)</h3>
       ${table(s.kimteam[0], s.kimteam.slice(1), { unit: '천원', cols: [32, 17, 17, 17, 17] })}</div>
     <div class="block detail"><div class="block-head"><h3>② 김해시 타부서 전국체전 관련 예산 (2022~2024)</h3><span class="unit">단위: 천원</span></div>
