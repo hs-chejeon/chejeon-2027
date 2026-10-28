@@ -183,6 +183,7 @@ td { color: var(--ink-2); }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 tr.total td { background: var(--raised); color: var(--ink); font-weight: 700; border-top: 2px solid var(--line-strong); }
 td.first { color: var(--ink); font-weight: 500; white-space: nowrap; }
+td.yr { text-align: center; }
 .ops td.num-ish { font-weight: 600; min-width: 12ch; text-align: right; font-variant-numeric: tabular-nums; }
 /* 세부내역 묶음: 옅은 파랑 바탕으로 총괄 표와 구분 */
 .block.detail { background: var(--accent-soft); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
@@ -553,7 +554,7 @@ function table(head, rows, opts = {}) {
   }).join('')}</div>` : '';
   return `${unit && hasNum ? `<div class="unit">단위: ${esc(unit)}</div>` : ''}${cards}<div class="scroll${cards ? ' d-only' : ''}"><table class="${opts.cols ? 'fixed' : 'auto-first'}">${cols}
     ${head.length ? `<thead><tr>${th.map((c) => `<th class="${c.numCol ? 'num' : ''}${c.hl ? ' hl-' + c.hl : ''}">${esc(c.h)}</th>`).join('')}</tr></thead>` : ''}
-    <tbody>${ordered.map((r) => `<tr class="${/^계( |$)|\s계$/.test((r[0] || '').trim()) ? 'total' : ''}">${th.map((c, i) => `<td class="${c.numCol ? 'num' : ''}${i === 0 ? ' first' : ''}${c.hl ? ' hl-' + c.hl : ''}${(opts.pre || []).includes(i) ? ' pre' : ''}">${esc(r[i] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody>
+    <tbody>${ordered.map((r) => `<tr class="${/^계( |$)|\s계$/.test((r[0] || '').trim()) ? 'total' : ''}">${th.map((c, i) => `<td class="${c.numCol ? 'num' : ''}${i === 0 ? ' first' : ''}${c.hl ? ' hl-' + c.hl : ''}${(opts.pre || []).includes(i) ? ' pre' : ''}${!c.numCol && /^\d{4}$/.test(String(r[i] ?? '').trim()) ? ' yr' : ''}">${esc(r[i] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody>
   </table></div>`;
 }
 
