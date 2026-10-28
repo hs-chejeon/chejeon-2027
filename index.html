@@ -735,13 +735,27 @@ function buildOps() {
 
 function buildKimBudget() {
   const s = DATA.summary;
+  // 김해시 예산: 추진단 예산 · 타부서 예산 · 총괄(백서 p.83)을 화면 안의 작은 탭으로 나눈다
+  const parts = [
+    ['kteam', '추진단 예산', `<div class="block narrow"><h3>김해시 전국체전추진단 예산 (2022~2024)</h3>
+      ${table(s.kimteam[0], s.kimteam.slice(1), { unit: '천원', cols: [32, 17, 17, 17, 17] })}</div>`],
+    ['kother', '타부서 예산', `<div class="block detail"><div class="block-head"><h3>김해시 타부서 전국체전 관련 예산 (2022~2024)</h3><span class="unit">단위: 천원</span></div>
+      ${table(s.kimother[0], s.kimother.slice(1), { amountCols: [2], cols: [7, 30, 10, 53] })}</div>`],
+    ['ktotal', '총괄', `<div class="block narrow"><h3>2024 김해시 전국체전 예산 현황·세부내역 (백서 p.83, 2018~2024, 타부서 포함)</h3>
+      ${table(s.gimhae[0], s.gimhae.slice(1), { unit: '백만원', cols: [32, 17, 17, 17, 17] })}</div>`],
+  ];
   addPanel('kimbud', '김해시 예산', 'kh', `
-    <div class="block narrow"><h3>① 김해시 전국체전추진단 예산 (2022~2024)</h3>
-      ${table(s.kimteam[0], s.kimteam.slice(1), { unit: '천원', cols: [32, 17, 17, 17, 17] })}</div>
-    <div class="block detail"><div class="block-head"><h3>② 김해시 타부서 전국체전 관련 예산 (2022~2024)</h3><span class="unit">단위: 천원</span></div>
-      ${table(s.kimother[0], s.kimother.slice(1), { amountCols: [2], cols: [7, 30, 10, 53] })}</div>
-    <div class="block narrow"><h3>③ 2024 김해시 전국체전 예산 현황·세부내역 (백서 p.83, 2018~2024, 타부서 포함)</h3>
-      ${table(s.gimhae[0], s.gimhae.slice(1), { unit: '백만원', cols: [32, 17, 17, 17, 17] })}</div>`);
+    <div class="subtabs" id="kimTabs" role="tablist" aria-label="김해시 예산 구분">${parts.map(([k, l]) => `<button type="button" role="tab" class="subtab" data-sub="${k}">${l}</button>`).join('')}</div>
+    ${parts.map(([k, , h]) => `<section class="subpanel" data-sub="${k}">${h}</section>`).join('')}`);
+}
+let kimSub = 'kteam';
+function bindKim() {
+  const pick = () => {
+    document.querySelectorAll('#kimTabs .subtab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.sub === kimSub)));
+    document.querySelectorAll('.subpanel').forEach((p) => { p.hidden = p.dataset.sub !== kimSub; });
+  };
+  pick();
+  $('#kimTabs').addEventListener('click', (e) => { const b = e.target.closest('.subtab'); if (b) { kimSub = b.dataset.sub; pick(); } });
 }
 function buildP83() {
   addPanel('p83', '백서 p.83', 'doc', `
@@ -808,6 +822,7 @@ function show(key) {
   document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.key === p.key)));
   if (p.key === 'ops') bindOps();
   if (p.key === 'book') bindBook();
+  if (p.key === 'kimbud') bindKim();
   try { localStorage.setItem('chejeon.tab', p.key); } catch (e) {}
 }
 function bindOps() {
