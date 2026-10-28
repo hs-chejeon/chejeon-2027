@@ -609,16 +609,47 @@ function addPanel(key, label, cls, html) { PANELS.push({ key, label, cls, html }
 const noKim = (r) => r.filter((_, i) => i !== 5);  // 세부내역 표에서 '2024 김해시' 열 빼기
 function buildSummary() {
   const s = DATA.summary;
-  addPanel('summary', '화성시 예산 총괄', 'hs', `
+  // 화성시 예산: 김해시 예산과 같은 순서(추진단 예산 · 타부서 예산 · 총괄)로 화면 안의 작은 탭을 나눈다
+  const n = (v) => Number(String(v).replace(/,/g, '')) || 0;
+  const f = (v) => (v ? v.toLocaleString() : '-');
+  const team = s.year[1].slice(1).map(n);                       // 추진단 [계, 2025, 2026, 2027] 천원
+  const other27 = n(s.other[1][2]) * 1000;                       // 타부서 2027 백만원 → 천원
+  const oth = [other27, 0, 0, other27];
+  const tot = team.map((v, i) => v + oth[i]);
+  const totalRows = [['계', ...tot.map(f)], ['전국체전추진단', ...team.map(f)], ['타부서', ...oth.map(f)]];
+  const parts = [
+    ['hteam', '추진단 예산', `
     <div class="split">
       <div class="block"><div class="block-head"><h3>재원별</h3><span class="unit">단위: 천원</span></div>${table(s.year[0], s.year.slice(1), { cols: [24, 19, 19, 19, 19] })}</div>
       <div class="block"><div class="block-head"><h3>성질별</h3><span class="unit">단위: 천원</span></div>${table(s.kind[0], s.kind.slice(1), { cols: [24, 19, 19, 19, 19] })}</div>
     </div>
     <div class="block detail"><div class="block-head"><h3>대회운영비 세부내역</h3><span class="unit">단위: 백만원</span></div>${table(noKim(s.ops[0]), s.ops.slice(1).map(noKim), { hl: { 4: 'hs' }, pre: [5], cols: [16, 10, 10, 10, 10, 44] })}</div>
-    <div class="block detail"><div class="block-head"><h3>시설비 세부내역</h3><span class="unit">단위: 백만원</span></div>${table(noKim(s.fac[0]), s.fac.slice(1).map(noKim), { hl: { 4: 'hs' }, pre: [5], cols: [16, 10, 10, 10, 10, 44] })}</div>
+    <div class="block detail"><div class="block-head"><h3>시설비 세부내역</h3><span class="unit">단위: 백만원</span></div>${table(noKim(s.fac[0]), s.fac.slice(1).map(noKim), { hl: { 4: 'hs' }, pre: [5], cols: [16, 10, 10, 10, 10, 44] })}</div>`],
+    ['hother', '타부서 예산', `
     <div class="block detail"><div class="block-head"><h3>추진단 외 부서별 전국체전 관련 예산 (2027)</h3><span class="unit">단위: 백만원</span></div>
-      ${table(s.other[0], s.other.slice(1), { amountCols: [2], cols: [14, 22, 9, 55] })}</div>
-  `);
+      ${table(s.other[0], s.other.slice(1), { amountCols: [2], cols: [14, 22, 9, 55] })}</div>`],
+    ['htotal', '총괄', `
+    <div class="block narrow"><div class="block-head"><h3>화성시 전국체전 예산 총괄 (추진단 + 타부서)</h3><span class="unit">단위: 천원</span></div>
+      ${table(['구분', '계', '2025', '2026', '2027'], totalRows, { cols: [28, 18, 18, 18, 18] })}</div>`],
+  ];
+  addPanel('summary', '화성시 예산 총괄', 'hs', subTabs('hsTabs', '화성시 예산 구분', parts));
+}
+
+// 화면 안의 작은 탭(화성시 예산·김해시 예산 공용)
+const SUB_SEL = {};
+function subTabs(id, label, parts) {
+  return `<div class="subtabs" id="${id}" role="tablist" aria-label="${label}">${parts.map(([k, l]) => `<button type="button" role="tab" class="subtab" data-sub="${k}">${l}</button>`).join('')}</div>
+    ${parts.map(([k, , h]) => `<section class="subpanel" data-sub="${k}">${h}</section>`).join('')}`;
+}
+function bindSubTabs(id) {
+  const bar = $('#' + id); if (!bar) return;
+  const pick = (k) => {
+    SUB_SEL[id] = k;
+    bar.querySelectorAll('.subtab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.sub === k)));
+    document.querySelectorAll('.subpanel').forEach((p) => { p.hidden = p.dataset.sub !== k; });
+  };
+  pick(SUB_SEL[id] || bar.querySelector('.subtab').dataset.sub);
+  bar.addEventListener('click', (e) => { const b = e.target.closest('.subtab'); if (b) pick(b.dataset.sub); });
 }
 
 let opsFilter = '';
@@ -744,18 +775,7 @@ function buildKimBudget() {
     ['ktotal', '총괄', `<div class="block narrow"><h3>2024 김해시 전국체전 예산 현황·세부내역 (백서 p.83, 2018~2024, 타부서 포함)</h3>
       ${table(s.gimhae[0], s.gimhae.slice(1), { unit: '백만원', cols: [32, 17, 17, 17, 17] })}</div>`],
   ];
-  addPanel('kimbud', '김해시 예산', 'kh', `
-    <div class="subtabs" id="kimTabs" role="tablist" aria-label="김해시 예산 구분">${parts.map(([k, l]) => `<button type="button" role="tab" class="subtab" data-sub="${k}">${l}</button>`).join('')}</div>
-    ${parts.map(([k, , h]) => `<section class="subpanel" data-sub="${k}">${h}</section>`).join('')}`);
-}
-let kimSub = 'kteam';
-function bindKim() {
-  const pick = () => {
-    document.querySelectorAll('#kimTabs .subtab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.sub === kimSub)));
-    document.querySelectorAll('.subpanel').forEach((p) => { p.hidden = p.dataset.sub !== kimSub; });
-  };
-  pick();
-  $('#kimTabs').addEventListener('click', (e) => { const b = e.target.closest('.subtab'); if (b) { kimSub = b.dataset.sub; pick(); } });
+  addPanel('kimbud', '김해시 예산', 'kh', subTabs('kimTabs', '김해시 예산 구분', parts));
 }
 function buildP83() {
   addPanel('p83', '백서 p.83', 'doc', `
@@ -822,7 +842,8 @@ function show(key) {
   document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.key === p.key)));
   if (p.key === 'ops') bindOps();
   if (p.key === 'book') bindBook();
-  if (p.key === 'kimbud') bindKim();
+  if (p.key === 'kimbud') bindSubTabs('kimTabs');
+  if (p.key === 'summary') bindSubTabs('hsTabs');
   try { localStorage.setItem('chejeon.tab', p.key); } catch (e) {}
 }
 function bindOps() {
