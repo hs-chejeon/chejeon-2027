@@ -176,32 +176,42 @@ body { background: var(--desk); color: var(--ink); }
 html.js, html.js body { height: 100%; }
 html.js body { display: flex; flex-direction: column; overflow: hidden; }
 html.js .pages-static { display: none; }
-html.js .stage, html.js .tools { display: flex; }
-.stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
-  padding-block: 14px 6px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+html.js .stage { display: flex; }
+/* 종이가 화면을 최대한 채우도록 바깥 여백은 최소, 도구는 떠 있는 접이식 */
+.stage { flex: 1; min-height: 0; align-items: center; justify-content: center;
+  padding-block: 8px; padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
 .page { background: var(--paper); container-type: inline-size; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 10px 30px rgba(0,0,0,.12); }
 .page .sheet { width: 100%; height: 100%; }
 .ink { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
 body.pen .ink { pointer-events: auto; touch-action: none; cursor: crosshair; }
+body.erase .ink { cursor: cell; }
 body.pen .page { box-shadow: 0 0 0 2px var(--tool-on), 0 10px 30px rgba(0,0,0,.12); }
 
-.tools { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px 10px;
-  padding-block: 6px 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+.fab, .tools button { height: 44px; min-width: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid var(--tool-line);
+  background: var(--tool-bg); color: var(--ink); font: 700 15px/1 var(--sans); cursor: pointer; }
+.fab { position: fixed; z-index: 20; left: max(12px, env(safe-area-inset-left, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 4px 14px rgba(0,0,0,.18); font-variant-numeric: tabular-nums; display: none; }
+html.js .fab { display: block; }
+.tools { position: fixed; z-index: 21; left: 0; right: 0; margin-inline: auto; width: max-content; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  max-width: calc(100% - 24px); box-sizing: border-box; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 8px;
+  padding: 8px; border-radius: 28px; background: rgba(247, 248, 250, .97); border: 1px solid var(--tool-line); box-shadow: 0 8px 28px rgba(0,0,0,.22);
   font: 400 14px/1.2 var(--sans); color: var(--ink-2); }
 .tools .grp-t { display: flex; align-items: center; gap: 6px; }
-.tools button { height: 44px; min-width: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid var(--tool-line);
-  background: var(--tool-bg); color: var(--ink); font: 700 15px/1 var(--sans); cursor: pointer; }
 .tools button:disabled { opacity: .35; cursor: default; }
-.tools button:focus-visible { outline: 2px solid var(--tool-on); outline-offset: 2px; }
+.fab:focus-visible, .tools button:focus-visible { outline: 2px solid var(--tool-on); outline-offset: 2px; }
 .tools button[aria-pressed="true"] { background: var(--tool-on); border-color: var(--tool-on); color: #fff; }
 .tools .sw { width: 44px; padding: 0; display: grid; place-items: center; }
 .tools .sw i { width: 18px; height: 18px; border-radius: 50%; display: block; }
 .tools .sw[aria-pressed="true"] { background: var(--tool-bg); border: 2px solid var(--tool-on); color: var(--ink); }
-.tools .count { min-width: 56px; text-align: center; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 700; }
+.tools .count { min-width: 48px; text-align: center; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 700; }
 .tools .sep { width: 1px; height: 28px; background: var(--tool-line); }
-.tools .hint { flex-basis: 100%; text-align: center; font-size: 13px; }
 .tools button.armed { background: var(--pen-red); border-color: var(--pen-red); color: #fff; }
-@media (max-width: 520px) { .tools .sep { display: none; } }
+.toast { position: fixed; z-index: 22; left: 50%; transform: translateX(-50%); top: calc(14px + env(safe-area-inset-top, 0px));
+  max-width: calc(100% - 32px); box-sizing: border-box; padding: 10px 16px; border-radius: 12px; background: rgba(32, 58, 123, .94); color: #fff;
+  font: 500 14px/1.4 var(--sans); text-align: center; transition: opacity .6s; display: none; }
+html.js .toast { display: block; }
+.toast.gone { opacity: 0; pointer-events: none; }
+@media (max-width: 560px) { .tools .sep { display: none; } }
 </style>
 
 <main class="stage" id="stage" aria-label="쪽지보고"></main>
@@ -331,7 +341,9 @@ body.pen .page { box-shadow: 0 0 0 2px var(--tool-on), 0 10px 30px rgba(0,0,0,.1
 </div>
 </div>
 
-<nav class="tools" aria-label="넘기기와 메모">
+<button type="button" class="fab" id="fab" aria-expanded="false" aria-controls="tools">도구 · <span id="fabCount">1/2</span></button>
+<p class="toast" id="toast">오른쪽 아래 모서리를 손끝으로 끌어 넘깁니다 · 왼쪽 아래 "도구"에서 펜·지우개</p>
+<nav class="tools" id="tools" aria-label="넘기기와 메모" hidden>
   <div class="grp-t">
     <button type="button" id="prev" aria-label="이전 쪽">◀</button>
     <span class="count" id="count">1 / 2</span>
@@ -340,12 +352,16 @@ body.pen .page { box-shadow: 0 0 0 2px var(--tool-on), 0 10px 30px rgba(0,0,0,.1
   <span class="sep" aria-hidden="true"></span>
   <div class="grp-t">
     <button type="button" id="pen" aria-pressed="false">펜</button>
+    <button type="button" id="eraser" aria-pressed="false">지우개</button>
     <button type="button" class="sw" id="red" aria-pressed="true" aria-label="빨간 펜"><i style="background:var(--pen-red)"></i></button>
     <button type="button" class="sw" id="blue" aria-pressed="false" aria-label="파란 펜"><i style="background:var(--pen-blue)"></i></button>
+  </div>
+  <span class="sep" aria-hidden="true"></span>
+  <div class="grp-t">
     <button type="button" id="undo">되돌리기</button>
     <button type="button" id="clear">이 쪽 지우기</button>
+    <button type="button" id="close" aria-label="도구 닫기">닫기</button>
   </div>
-  <p class="hint" id="hint">오른쪽 아래 모서리를 손끝으로 끌어 넘깁니다 · 펜을 켜면 쪽 위에 쓰고, 끄면 다시 넘깁니다 · 메모는 이 기기에만 저장</p>
 </nav>
 
 <script>/* StPageFlip 2.0.7 (MIT) */
@@ -368,11 +384,10 @@ function save() { try { localStorage.setItem(KEY, JSON.stringify(memo)); } catch
 
 // ---------- 결재판 크기: A4 세로가 화면에 꽉 차게 ----------
 function fitSize() {
-  // 화면 높이에서 도구 막대·여백을 뺀 만큼 (넘김 영역이 도구 막대를 덮지 않게 창 크기로 직접 계산)
+  // 화면 전체에서 바깥 여백만 뺀 만큼 (도구는 종이 위에 떠 있으므로 높이를 차지하지 않음)
   const cs = getComputedStyle(stage), rs = getComputedStyle(document.documentElement);
-  const tools = document.querySelector(".tools").offsetHeight;
   const aw = document.documentElement.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const ah = window.innerHeight - parseFloat(rs.paddingTop) - parseFloat(rs.paddingBottom) - tools
+  const ah = window.innerHeight - parseFloat(rs.paddingTop) - parseFloat(rs.paddingBottom) 
     - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
   const w = Math.floor(Math.max(200, Math.min(aw, ah * 210 / 297)));
   return { w, h: Math.round(w * 297 / 210) };
@@ -407,12 +422,13 @@ function build() {
 function showCount() {
   const n = pageEls.length;
   countEl.textContent = `${cur + 1} / ${n}`;
+  document.getElementById("fabCount").textContent = `${cur + 1}/${n}`;
   document.getElementById("prev").disabled = cur === 0;
   document.getElementById("next").disabled = cur >= n - 1;
 }
 
 // ---------- 펜 메모 ----------
-let pen = false, color = getComputedStyle(document.documentElement).getPropertyValue("--pen-red").trim();
+let pen = false, erasing = false, color = getComputedStyle(document.documentElement).getPropertyValue("--pen-red").trim();
 function drawSeg(ctx, s, a, b, w, h) {
   const p = (a[2] + b[2]) / 2;
   ctx.strokeStyle = s.c;
@@ -446,14 +462,24 @@ function setupInk(w, h) {
       const pr = e.pointerType === "pen" ? (e.pressure || 0.5) : 0.5;
       return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, pr];
     };
+    // 지우개: 손끝이 지나간 자리에 걸친 줄을 통째로 지움
+    let rubbing = false;
+    const eraseAt = q => {
+      const list = memo[i]; if (!list || !list.length) return;
+      const rr = 0.02, k = h / w;
+      const keep = list.filter(s => !s.p.some(a => { const dx = a[0] - q[0], dy = (a[1] - q[1]) * k; return dx * dx + dy * dy < rr * rr; }));
+      if (keep.length !== list.length) { memo[i] = keep; redraw(c); save(); }
+    };
     c.addEventListener("pointerdown", e => {
       if (!pen) return;
       e.stopPropagation(); e.preventDefault();
       c.setPointerCapture(e.pointerId);
+      if (erasing) { rubbing = true; eraseAt(pt(e)); return; }
       stroke = { c: color, p: [pt(e)] };
       drawStroke(c, stroke);
     });
     c.addEventListener("pointermove", e => {
+      if (rubbing) { e.stopPropagation(); const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e]; (evs.length ? evs : [e]).forEach(ev => eraseAt(pt(ev))); return; }
       if (!stroke) return;
       e.stopPropagation();
       const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
@@ -464,6 +490,7 @@ function setupInk(w, h) {
       }
     });
     const end = e => {
+      if (rubbing) { rubbing = false; e.stopPropagation(); return; }
       if (!stroke) return;
       e.stopPropagation();
       (memo[i] = memo[i] || []).push({ c: stroke.c, p: stroke.p.map(q => q.map(v => Math.round(v * 10000) / 10000)) });
@@ -476,17 +503,22 @@ function setupInk(w, h) {
 function inkOf(i) { return pageEls[i] && pageEls[i].querySelector(".ink"); }
 
 const penBtn = document.getElementById("pen");
-penBtn.addEventListener("click", () => {
-  pen = !pen;
-  penBtn.setAttribute("aria-pressed", String(pen));
-  penBtn.textContent = pen ? "펜 켜짐" : "펜";
+const eraseBtn = document.getElementById("eraser");
+// 모드: 넘기기(기본) / 펜 / 지우개. 펜·지우개가 켜져 있는 동안에는 종이가 넘어가지 않음
+function setMode(m) {
+  pen = m !== "flip"; erasing = m === "erase";
+  penBtn.setAttribute("aria-pressed", String(m === "pen"));
+  eraseBtn.setAttribute("aria-pressed", String(m === "erase"));
   document.body.classList.toggle("pen", pen);
-});
+  document.body.classList.toggle("erase", erasing);
+}
+penBtn.addEventListener("click", () => setMode(pen && !erasing ? "flip" : "pen"));
+eraseBtn.addEventListener("click", () => setMode(erasing ? "flip" : "erase"));
 function pick(id, varName) {
   color = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
   document.getElementById("red").setAttribute("aria-pressed", String(id === "red"));
   document.getElementById("blue").setAttribute("aria-pressed", String(id === "blue"));
-  if (!pen) penBtn.click();
+  if (!pen || erasing) setMode("pen");
 }
 document.getElementById("red").addEventListener("click", () => pick("red", "--pen-red"));
 document.getElementById("blue").addEventListener("click", () => pick("blue", "--pen-blue"));
@@ -506,6 +538,19 @@ clearBtn.addEventListener("click", () => {
   clearTimeout(armT); clearBtn.classList.remove("armed"); clearBtn.textContent = "이 쪽 지우기";
   memo[cur] = []; save(); redraw(inkOf(cur));
 });
+
+// ---------- 도구 열기·닫기 ----------
+const fab = document.getElementById("fab"), toolsEl = document.getElementById("tools");
+function openTools(open) {
+  toolsEl.hidden = !open; fab.hidden = open;
+  fab.setAttribute("aria-expanded", String(open));
+  if (!open) setMode("flip");
+}
+fab.addEventListener("click", () => openTools(true));
+document.getElementById("close").addEventListener("click", () => { openTools(false); fab.focus(); });
+const toast = document.getElementById("toast");
+setTimeout(() => toast.classList.add("gone"), 5000);
+toast.addEventListener("click", () => toast.classList.add("gone"));
 
 // ---------- 넘기기 ----------
 document.getElementById("prev").addEventListener("click", () => pf && pf.flipPrev("bottom"));
